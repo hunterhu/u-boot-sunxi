@@ -1,23 +1,26 @@
 /*
-*************************************************************************************
-*                         			      u-boot
-*					                     Fast Boot
-*
-*				        (c) Copyright 2006-2011, All winners Co,Ld.
-*							       All Rights Reserved
-*
-* File Name 	: fastboot.c
-*
-* Author 		: javen
-*
-* Description 	:
-*
-* History 		:
-*      <author>    		<time>       	<version >    		<desc>
-*       javen     	  2011-10-8            1.0          create this file
-*
-*************************************************************************************
-*/
+ * (C) Copyright 2007-2012
+ * Allwinner Technology Co., Ltd. <www.allwinnertech.com>
+ * Jerry Wang <wangflord@allwinnertech.com>
+ *
+ * See file CREDITS for list of people who contributed to this
+ * project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ * MA 02111-1307 USA
+ */
 
 #include <common.h>
 #include <asm/io.h>
@@ -32,7 +35,7 @@
 #include  "usb/usb_bsp.h"
 
 //-----------------------------------------------------------------------------
-//   ∫Í∂®“Â
+//   ÂÆèÂÆö‰πâ
 //-----------------------------------------------------------------------------
 
 /* debug */
@@ -45,14 +48,14 @@
     #define DMSG_DEBUG(...)
 #endif
 
-/* ∆’Õ®–≈œ¢¥Ú”° */
+/* ÊôÆÈÄö‰ø°ÊÅØÊâìÂç∞ */
 #if  0
     #define DMSG_INFO         			DMSG_PRINT
 #else
     #define DMSG_INFO(...)
 #endif
 
-/* —œ÷ÿæØ∏Ê */
+/* ‰∏•ÈáçË≠¶Âëä */
 #if	0
     #define DMSG_PANIC        			DMSG_ERR
 #else
@@ -69,9 +72,9 @@
 #define	DEVICE_PRODUCT_ID 					0x0FFF  //0x1010
 #define	DEVICE_BCD        					0x0200
 
-#define DEVICE_MANUFACTURER		            "USB Developer"  		/* ≥ß…Ã–≈œ¢ 	*/
-#define DEVICE_PRODUCT				        "Android Fastboot"  	/* ≤˙∆∑–≈œ¢ 	*/
-#define DEVICE_SERIAL_NUMBER			    "20080411"  			/* ≤˙∆∑–Ú¡–∫≈ 	*/
+#define DEVICE_MANUFACTURER		            "USB Developer"  		/* ÂéÇÂïÜ‰ø°ÊÅØ 	*/
+#define DEVICE_PRODUCT				        "Android Fastboot"  	/* ‰∫ßÂìÅ‰ø°ÊÅØ 	*/
+#define DEVICE_SERIAL_NUMBER			    "20080411"  			/* ‰∫ßÂìÅÂ∫èÂàóÂè∑ 	*/
 #define DEVICE_CONFIG                       "Android Fastboot"
 #define DEVICE_INTERFACE                    "Android Bootloader Interface"
 
@@ -146,7 +149,7 @@
 
 
 //-----------------------------------------------------------------------------
-//    ˝æ›Ω·ππ
+//   Êï∞ÊçÆÁªìÊûÑ
 //-----------------------------------------------------------------------------
 struct sw_udc{
     u32 usb_base;
@@ -172,7 +175,7 @@ enum usb_device_speed {
 };
 
 //-----------------------------------------------------------------------------
-//  ‘§∂®“Â
+//  È¢ÑÂÆö‰πâ
 //-----------------------------------------------------------------------------
 
 static char *device_strings[DEVICE_STRING_MANUFACTURER_INDEX + 1];
@@ -183,7 +186,7 @@ static u8 fastboot_fifo_ep0[EP0_FIFOSIZE];
 static u8 fastboot_fifo_bulk_ep[BULK_FIFOSIZE];
 
 static unsigned int set_address = 0;
-static unsigned int deferred_rx = 0;    /* rx ¥´ ‰—” ± */
+static unsigned int deferred_rx = 0;    /* rx ‰º†ËæìÂª∂Êó∂ */
 
 //-----------------------------------------------------------------------------
 //
@@ -311,13 +314,13 @@ static void fastboot_bulk_endpoint_reset (void)
 	/* tx */
 	USBC_SelectActiveEp(udc.bsp, BULK_IN_EP_INDEX);
     USBC_Dev_ConfigEp(udc.bsp, USBC_TS_TYPE_BULK, USBC_EP_TYPE_TX, 1, udc.bulk_ep_size & 0x7ff);
-	USBC_ConfigFifo(udc.bsp, USBC_EP_TYPE_TX, 1, udc.fifo_size, 1024);		//1kø™ º, √ø∏ˆep∑÷≈‰1Kµƒø’º‰
+	USBC_ConfigFifo(udc.bsp, USBC_EP_TYPE_TX, 1, udc.fifo_size, 1024);		//1kÂºÄÂßã, ÊØè‰∏™epÂàÜÈÖç1KÁöÑÁ©∫Èó¥
 	USBC_INT_EnableEp(udc.bsp, USBC_EP_TYPE_TX, BULK_IN_EP_INDEX);
 
 	/* rx */
 	USBC_SelectActiveEp(udc.bsp, BULK_OUT_EP_INDEX);
 	USBC_Dev_ConfigEp(udc.bsp, USBC_TS_TYPE_BULK, USBC_EP_TYPE_RX, 1, udc.bulk_ep_size & 0x7ff);
-	USBC_ConfigFifo(udc.bsp, USBC_EP_TYPE_RX, 1, udc.fifo_size, 2048);		//2kø™ º, √ø∏ˆep∑÷≈‰1Kµƒø’º‰
+	USBC_ConfigFifo(udc.bsp, USBC_EP_TYPE_RX, 1, udc.fifo_size, 2048);		//2kÂºÄÂßã, ÊØè‰∏™epÂàÜÈÖç1KÁöÑÁ©∫Èó¥
 	USBC_INT_EnableEp(udc.bsp, USBC_EP_TYPE_RX, BULK_OUT_EP_INDEX);
 
 	USBC_SelectActiveEp(udc.bsp, old_ep_index);
@@ -375,7 +378,7 @@ static void fastboot_reset(void)
     USBC_INT_DisableEpAll(udc.bsp, USBC_EP_TYPE_RX);
     USBC_INT_DisableEpAll(udc.bsp, USBC_EP_TYPE_TX);
 
-    /* ø™∆Ùsession end, reset°¢resume°¢suspend÷–∂œ */
+    /* ÂºÄÂêØsession end, reset„ÄÅresume„ÄÅsuspend‰∏≠Êñ≠ */
 	USBC_INT_EnableUsbMiscUint(udc.bsp, USBC_BP_INTUSB_SOF);
 	USBC_INT_EnableUsbMiscUint(udc.bsp, USBC_BP_INTUSB_SUSPEND);
 	USBC_INT_EnableUsbMiscUint(udc.bsp, USBC_BP_INTUSB_RESUME);
@@ -1147,7 +1150,7 @@ static int fastboot_suspend(void)
 *                     filtrate_irq_misc
 *
 * Description:
-*    π˝¬À√ª”√µƒ÷–∂œ, ±£¡Ù disconect, reset, resume, suspend
+*    ËøáÊª§Ê≤°Áî®ÁöÑ‰∏≠Êñ≠, ‰øùÁïô disconect, reset, resume, suspend
 *
 * Parameters:
 *    void
@@ -1662,22 +1665,22 @@ u32 close_usb_clock(u32 ccmu_base)
 
     DMSG_INFO("close_usb_clock\n");
 
-    //ø™usb ahb ±÷”
+    //ÂºÄusb ahbÊó∂Èíü
 	reg_value = readl(ccmu_base + 0x60);
 	x_clear_bit(reg_value, 0);	/* AHB clock gate usb0 */
 	writel(reg_value, (ccmu_base + 0x60));
 
-    //µ»sieµƒ ±÷”±‰Œ»
+    //Á≠âsieÁöÑÊó∂ÈíüÂèòÁ®≥
 	reg_value = 10000;
 	while(reg_value--);
 
-	//ø™USB phy ±÷”
+	//ÂºÄUSB phyÊó∂Èíü
 	reg_value = readl((ccmu_base + 0xcc));
 	x_clear_bit(reg_value, 0);
 	x_clear_bit(reg_value, 8);
 	writel(reg_value, (ccmu_base + 0xcc));
 
-	//—” ±
+	//Âª∂Êó∂
 	reg_value = 10000;
 	while(reg_value--);
 
@@ -1705,9 +1708,9 @@ u32 close_usb_clock(u32 ccmu_base)
 int fastboot_init(struct cmd_fastboot_interface *interface)
 {
 	bsp_usbc_t usbc;
-
-    DMSG_INFO("fastboot_init\n");
-
+#ifdef DEBUG
+    printf("fastboot_init\n");
+#endif
     device_strings[DEVICE_STRING_MANUFACTURER_INDEX]    = DEVICE_MANUFACTURER;
     device_strings[DEVICE_STRING_PRODUCT_INDEX]         = DEVICE_PRODUCT;
     device_strings[DEVICE_STRING_SERIAL_NUMBER_INDEX]   = DEVICE_SERIAL_NUMBER;
@@ -1740,7 +1743,7 @@ int fastboot_init(struct cmd_fastboot_interface *interface)
 
 	udc.bsp = USBC_open_otg(0);
 	if(udc.bsp == 0){
-		DMSG_PANIC("ERR: USBC_open_otg failed\n");
+		printf("ERR: USBC_open_otg failed\n");
 		return -1;
 	}
 

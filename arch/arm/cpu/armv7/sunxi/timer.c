@@ -34,13 +34,22 @@ DECLARE_GLOBAL_DATA_PTR;
 #define TIMER_RELOAD (1 << 1)   /* reload internal value */
 #define TIMER_EN     (1 << 0)   /* enable timer */
 
+#ifdef CONFIG_FPGA
+#define TIMER_CLOCK	       (32 * 1000)
+#else
 #define TIMER_CLOCK	       (24 * 1000 * 1000)
+#endif
+
 #define COUNT_TO_USEC(x)	((x) / 24)
 #define USEC_TO_COUNT(x)	((x) * 24)
 #define TICKS_PER_HZ		(TIMER_CLOCK / CONFIG_SYS_HZ)
 #define TICKS_TO_HZ(x)		((x) / TICKS_PER_HZ)
 
+#ifdef CONFIG_FPGA
+#define TIMER_LOAD_VAL     0xffff
+#else
 #define TIMER_LOAD_VAL     0xffffffff
+#endif
 
 #define TIMER_NUM    (0)        /* we use timer 0 */
 
@@ -53,8 +62,10 @@ static struct sunxi_timer *timer_base =
 /* init timer register */
 int timer_init(void)
 {
+#ifndef CONFIG_FPGA
 	writel(TIMER_LOAD_VAL, &timer_base->inter);
 	writel(TIMER_MODE | TIMER_DIV | TIMER_SRC | TIMER_RELOAD | TIMER_EN, &timer_base->ctl);
+#endif /* CONFIG_SUN6I_FPGA */
 	return 0;
 }
 
@@ -112,3 +123,43 @@ ulong get_tbclk(void)
 	tbclk = CONFIG_SYS_HZ;
 	return tbclk;
 }
+
+
+
+#ifdef DEBUG_TICK_PRINTF
+void tick_printf(char *s, int line)
+{
+	uint time, time_sec, time_rest;
+
+	time = *(volatile unsigned int *)(0x01c20C00 + 0x84);
+	time_sec = time/1000;
+	time_rest = time%1000;
+	if(!s)
+	{
+		printf("[%8d.%3d] %s\n",time_sec, time_rest);
+	}
+	else
+	{
+		printf("[%8d.%3d] %s %d\n",time_sec, time_rest, s, line);
+	}
+
+	return ;
+}
+#else
+void tick_printf(char *s, int line)
+{
+}
+#endif
+
+void stick_printf(void)
+{
+	uint time, time_sec, time_rest;
+
+	time = *(volatile unsigned int *)(0x01c20C00 + 0x84);
+	time_sec = time/1000;
+	time_rest = time%1000;
+	printf("[%8d.%3d]\n",time_sec, time_rest);
+
+	return ;
+}
+

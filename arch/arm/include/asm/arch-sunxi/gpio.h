@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2007-2012
+ * (C) Copyright 2007-2011
  * Allwinner Technology Co., Ltd. <www.allwinnertech.com>
  * Tom Cubie <tangliang@allwinnertech.com>
  *
@@ -25,9 +25,10 @@
 #ifndef _SUNXI_GPIO_H
 #define _SUNXI_GPIO_H
 
+#include <common.h>
 /*
  * sunxi has 9 banks of gpio, they are:
- * PA0 - PA17 | PB0 - PB23 | PC0 - PC24
+ * PA0 - PA17 | PB0 - PB23 | PC0 - PC23
  * PD0 - PD27 | PE0 - PE31 | PF0 - PF5
  * PG0 - PG9  | PH0 - PH27 | PI0 - PI12
  */
@@ -43,23 +44,23 @@
 #define SUNXI_GPIO_I    8
 
 struct sunxi_gpio {
-	u32 cfg[4];
-	u32 dat;
-	u32 drv[2];
-	u32 pull[2];
+	unsigned int cfg[4];
+	unsigned intdat;
+	unsigned int drv[2];
+	unsigned int pull[2];
 };
 
 /* gpio interrupt control */
 struct sunxi_gpio_int {
-	u32 cfg[3];
-	u32 ctl;
-	u32 sta;
-	u32 deb;			/* interrupt debounce */
+	unsigned int cfg[3];
+	unsigned int ctl;
+	unsigned int sta;
+	unsigned int deb;			/* interrupt debounce */
 };
 
 struct sunxi_gpio_reg {
 	struct sunxi_gpio gpio_bank[9];
-	u8 res[0xbc];
+	unsigned char res[0xbc];
 	struct sunxi_gpio_int gpio_int;
 };
 
@@ -152,9 +153,9 @@ enum sunxi_gpio_number {
 #define SUNXI_GPF4_SDC0_D3      (2)
 #define SUNXI_GPF4_UART0_RX     (4)
 
-int sunxi_gpio_set_cfgpin(u32 pin, u32 val);
-int sunxi_gpio_get_cfgpin(u32 pin);
-int sunxi_gpio_output(u32 pin, u32 val);
-int sunxi_gpio_input(u32 pin);
+int sunxi_gpio_set_cfgpin(unsigned int pin, unsigned int val);
+int sunxi_gpio_get_cfgpin(unsigned int pin);
+int sunxi_gpio_output(unsigned int pin, unsigned int val);
+int sunxi_gpio_input(unsigned int pin);
 
 #endif /* _SUNXI_GPIO_H */

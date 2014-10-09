@@ -31,7 +31,9 @@
 #include <fdt_support.h>
 #include <fastboot.h>
 #include <asm/arch/clock.h>
-
+#ifdef CONFIG_ALLWINNER
+#include <asm/arch/boot_type.h>
+#endif
 DECLARE_GLOBAL_DATA_PTR;
 
 #if defined (CONFIG_SETUP_MEMORY_TAGS) || \
@@ -166,7 +168,9 @@ int do_boota_linux (struct fastboot_boot_img_hdr *hdr)
 	ulong initrd_start, initrd_end;
 	void (*kernel_entry)(int zero, int arch, uint params);
 	bd_t *bd = gd->bd;
-
+#ifdef DEBUG
+	printf("do_boota_linux storage_type = %d\n", storage_type);
+#endif
 	kernel_entry = (void (*)(int, int, uint))(hdr->kernel_addr);
 
 #ifdef CONFIG_CMDLINE_TAG
@@ -176,7 +180,11 @@ int do_boota_linux (struct fastboot_boot_img_hdr *hdr)
 	initrd_start = hdr->ramdisk_addr;
 	initrd_end = initrd_start + hdr->ramdisk_size;
 
-#if defined (CONFIG_SETUP_MEMORY_TAGS)
+#if defined (CONFIG_SETUP_MEMORY_TAGS) || \
+    defined (CONFIG_CMDLINE_TAG) || \
+    defined (CONFIG_INITRD_TAG) || \
+    defined (CONFIG_SERIAL_TAG) || \
+    defined (CONFIG_REVISION_TAG)
 	setup_start_tag (bd);
 #ifdef CONFIG_SERIAL_TAG
 	setup_serial_tag (&params);
@@ -185,12 +193,7 @@ int do_boota_linux (struct fastboot_boot_img_hdr *hdr)
 	setup_revision_tag (&params);
 #endif
 #ifdef CONFIG_SETUP_MEMORY_TAGS
-	/*----------------------------------------------------------------------
-	 * We don't need to set memory tags, since kernel will squash_mem_tags()
-	 * in arch/arm/kernel/setup.c. If we set memory tags, kernel will print
-	 * "Ignoring unrecognised tag 0x00000000" at boot time.
-	 *----------------------------------------------------------------------*/
-	/* setup_memory_tags (bd); */
+	setup_memory_tags (bd);
 #endif
 #ifdef CONFIG_CMDLINE_TAG
 	if(strlen((const char *)hdr->cmdline)) {
@@ -208,13 +211,19 @@ int do_boota_linux (struct fastboot_boot_img_hdr *hdr)
 #endif
 	setup_end_tag (bd);
 #endif
-
-	/* nand exit */
-	NAND_Exit();
-
+	sunxi_flash_exit();
 	/* we assume that the kernel is in place */
 	announce_and_cleanup();
+#if 0
+	sr32(SUNXI_CCM_APB1_GATING, 16, 2, 0);
 	sr32(SUNXI_CCM_APB1_GATING, 16, 1, 0);
+#endif
+
+   *(volatile unsigned int *)(0x01c20C00 + 0x84 )  = 0;
+   *(volatile unsigned int *)(0x01c20C00 + 0x8C )  = 0x05DB05DB;
+   *(volatile unsigned int *)(0x01c20C00 + 0x80 )  = 0;
+   *(volatile unsigned int *)(0x01c20000 + 0x144) &= ~(1U << 31);
+
 
 	kernel_entry(0, bd->bi_arch_number, bd->bi_boot_params);
 	/* does not return */

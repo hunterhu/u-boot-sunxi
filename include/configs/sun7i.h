@@ -206,7 +206,6 @@
 	"run setargs loadscript loadkernel; watchdog 0; bootm $kerneladdr;"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-    "console=ttyS0,115200\0" \
 	"root=/dev/nand3 rootwait\0" \
 	"panicarg=panic=10\0" \
 	"extraargs=\0" \

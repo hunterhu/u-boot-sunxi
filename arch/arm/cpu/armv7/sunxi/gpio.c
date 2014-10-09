@@ -26,6 +26,7 @@
 #include <asm/io.h>
 #include <asm/arch/gpio.h>
 
+#if 0
 int sunxi_gpio_set_cfgpin(u32 pin, u32 val) {
 
 	u32 cfg;
@@ -95,12 +96,12 @@ int sunxi_gpio_input(u32 pin) {
 
 	return (dat & 0x1);
 }
-
+/*
 int gpio_request(unsigned gpio, const char *label) {
 
 	return 0;
 }
-
+*/
 int gpio_free(unsigned gpio) {
 
 	return 0;
@@ -145,3 +146,6 @@ U_BOOT_CMD(
 	""
 );
 #endif
+
+#endif
+

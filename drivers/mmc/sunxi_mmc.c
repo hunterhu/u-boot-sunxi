@@ -34,7 +34,6 @@
 #include <mmc.h>
 
 #undef SUNXI_MMCDBG
-
 #ifdef SUNXI_MMCDBG
 #define MMCDBG(fmt...)	printf("[mmc]: "fmt)
 
@@ -100,7 +99,7 @@ struct sunxi_mmc_des {
 	u32	data_buf1_sz:13,
 	    data_buf2_sz:13,
     				:6;
-#elif defined CONFIG_SUN5I
+#elif defined CONFIG_SUN7I
 #define SDXC_DES_NUM_SHIFT 16
 #define SDXC_DES_BUFFER_MAX_LEN	(1 << SDXC_DES_NUM_SHIFT)
 	u32 data_buf1_sz:16,
@@ -126,6 +125,117 @@ struct sunxi_mmc_host {
 /* support 4 mmc hosts */
 struct mmc mmc_dev[4];
 struct sunxi_mmc_host mmc_host[4];
+
+
+u32 ccm_get_pll5_dev_clk(void)
+{
+	u32 rval = 0;
+	u32 n, k,p;
+	u32 pll5_clk = 0;
+	rval = readl(SUNXI_CCM_PLL5_CFG);
+	n = (rval >> 8) &  0x1f;
+	k = ((rval >> 4) & 3) + 1;
+	p = 1 << ((rval >> 16) & 3);
+	pll5_clk = 24000000 * n * k / p;
+	return pll5_clk;
+}
+
+u32 ccm_get_pll6_dev_clk(void)
+{
+	u32 rval = 0;
+	u32 n, k;
+	u32 pll6_clk = 0;
+	rval = readl(SUNXI_CCM_PLL6_CFG);
+	n = (rval >> 8) &  0x1f;
+	k = ((rval >> 4) & 3) + 1;
+	pll6_clk = (24000000 * n * k)>>1;
+	return pll6_clk;
+}
+
+s32 smc_set_card_clk(u32 smc_no, u32 cclk,u32 bus_width)
+{
+	struct sunxi_mmc_host* mmchost = &mmc_host[smc_no];
+	u32 sclk = 24000000;
+	u32 div;
+	u32 rval;
+	u32 src = 0;
+	u32 mclk_base = mmchost->mclkbase;
+	u32 m, n;
+	u32 outclk_pha = 0;
+	u32 samclk_pha = 0;
+	
+	
+	if (cclk > 400000) {
+		src = 1;//change to you select source:0->LOSC24M;1->PLL6;2->PLL5.
+		sclk = ccm_get_pll6_dev_clk();	//change to you select source clock
+		outclk_pha = 0;
+		samclk_pha = 0;			
+	}else{
+		src = 0;
+		sclk = 24000000;
+		outclk_pha = 0;
+		samclk_pha = 0;	
+	}
+
+	div = (2 * sclk + cclk) / (2 * cclk);
+	div = div==0 ? 1 : div;
+	if (div > 128) {
+		m = 1;
+		n = 0;
+		MMCDBG("Source clock is too high\n");
+	} else if (div > 64) {
+		n = 3;
+		m = div >> 3;
+	} else if (div > 32) {
+		n = 2;
+		m = div >> 2;
+	} else if (div > 16) {
+		n = 1;
+		m = div >> 1;
+	} else {
+		n = 0;
+		m = div;
+	}
+	
+	rval = (1U << 31) | (src << 24) | (samclk_pha << 20)
+	  		| (n << 16) | (outclk_pha << 8) | (m - 1);
+	writel(rval, mclk_base);
+	
+	/* clear internal divider */
+	rval = readl(&mmchost->reg->clkcr) & (~0xff);
+	writel(rval, &mmchost->reg->clkcr);
+ 
+	
+	switch(n)
+	{
+		case 0:
+			mmchost->mod_clk = sclk/1/m;
+			MMCDBG("Card clock=%d\n",sclk/1/m);
+			break;
+		case 1:
+			mmchost->mod_clk = sclk/2/m;
+			MMCDBG("Card clock=%d\n",sclk/2/m);
+			break;
+		case 2:
+			mmchost->mod_clk = sclk/4/m;
+			MMCDBG("Card clock=%d\n",sclk/4/m);
+			break;
+		case 3:
+			mmchost->mod_clk = sclk/8/m;
+			MMCDBG("Card clock=%d\n",sclk/8/m);
+			break;
+		default:
+			break;
+	}
+	//dumphex32("ccmu", (char*)0x01c20000, 0x100);
+	return cclk;
+}
+
+
+
+
+
+
 
 static int mmc_resource_init(int sdc_no)
 {
@@ -173,11 +283,12 @@ static int mmc_clk_io_on(int sdc_no)
 	#if 0
 	static struct sunxi_gpio *gpio_g =
 			&((struct sunxi_gpio_reg *)SUNXI_PIO_BASE)->gpio_bank[SUNXI_GPIO_G];
-	#endif
 	static struct sunxi_gpio *gpio_h =
 			&((struct sunxi_gpio_reg *)SUNXI_PIO_BASE)->gpio_bank[SUNXI_GPIO_H];
 	static struct sunxi_gpio *gpio_i =
 			&((struct sunxi_gpio_reg *)SUNXI_PIO_BASE)->gpio_bank[SUNXI_GPIO_I];
+	#endif
+
 	MMCDBG("init mmc %d clock and io\n", sdc_no);
 	/* config gpio */
 	switch (sdc_no) {
@@ -185,22 +296,10 @@ static int mmc_clk_io_on(int sdc_no)
             /* D1-PF0, D0-PF1, CLK-PF2, CMD-PF3, D3-PF4, D4-PF5 */
             writel(0x222222, &gpio_f->cfg[0]);
             writel(0x555, &gpio_f->pull[0]);
-            writel(0xaaa, &gpio_f->drv[0]);
+            writel(0xfff, &gpio_f->drv[0]);
             break;
 
         case 1:
-            #if 0
-            /* PG0-CMD, PG1-CLK, PG2~5-D0~3 : 4 */
-            writel(0x444444, &gpio_g->cfg[0]);
-            writel(0x555, &gpio_g->pull[0]);
-            writel(0xaaa, &gpio_g->drv[0]);
-            #else
-            /* PH22-CMD, PH23-CLK, PH24~27-D0~D3 : 5 */
-            writel(0x55<<24, &gpio_h->cfg[2]);
-            writel(0x5555, &gpio_h->cfg[3]);
-            writel(0x555<<12, &gpio_h->pull[1]);
-            writel(0xaaa<<12, &gpio_h->drv[1]);
-            #endif
             break;
 
         case 2:
@@ -208,15 +307,10 @@ static int mmc_clk_io_on(int sdc_no)
             writel(0x33<<24, &gpio_c->cfg[0]);
             writel(0x3333, &gpio_c->cfg[1]);
             writel(0x555<<12, &gpio_c->pull[0]);
-            writel(0xaaa<<12, &gpio_c->drv[0]);
+            writel(0xfff<<12, &gpio_c->drv[0]);
             break;
 
         case 3:
-            /* PI4-CMD, PI5-CLK, PI6~9-D0~D3 : 2 */
-            writel(0x2222<<16, &gpio_i->cfg[0]);
-            writel(0x22, &gpio_i->cfg[1]);
-            writel(0x555<<8, &gpio_i->pull[0]);
-            writel(0x555<<8, &gpio_i->drv[0]);
             break;
 
         default:
@@ -227,19 +321,23 @@ static int mmc_clk_io_on(int sdc_no)
 	rval = readl(mmchost->hclkbase);
 	rval |= (1 << (8 + sdc_no));
 	writel(rval, mmchost->hclkbase);
-	
+
 	/* config mod clock */
-	rval = readl(SUNXI_CCM_PLL5_CFG);
-	n = (rval >> 8) &  0x1f;
-	k = ((rval >> 4) & 3) + 1;
-	p = 1 << ((rval >> 16) & 3);
-	pll5_clk = 24000000 * n * k / p;
-	if (pll5_clk > 400000000)
-		divider = 4;
-	else
-		divider = 3;
-	writel((1U << 31) | (2U << 24) | divider, mmchost->mclkbase);
-	mmchost->mod_clk = pll5_clk / (divider + 1);
+//	rval = readl(SUNXI_CCM_PLL5_CFG);
+//	n = (rval >> 8) &  0x1f;
+//	k = ((rval >> 4) & 3) + 1;
+//	p = 1 << ((rval >> 16) & 3);
+//	pll5_clk = 24000000 * n * k / p;
+//    MMCDBG("PLL5 clock=%d\n",pll5_clk);
+//	if (pll5_clk > 400000000)
+//		divider = 4;
+//	else
+//		divider = 3;
+//    //is there some problem ??? the phease is zero
+//	writel((1U << 31) | (2U << 24) | divider, mmchost->mclkbase);
+//	mmchost->mod_clk = pll5_clk / (divider + 1);
+	smc_set_card_clk(sdc_no,400000,1);
+  MMCDBG("mmchost->mod_clk=%d\n",mmchost->mod_clk);
 	dumphex32("ccmu", (char*)SUNXI_CCM_BASE, 0x100);
 	dumphex32("gpio", (char*)SUNXI_PIO_BASE, 0x100);
 	dumphex32("mmc", (char*)mmchost->reg, 0x100);
@@ -262,7 +360,7 @@ static int mmc_update_clk(struct mmc *mmc)
 	return 0;
 }
 
-static int mmc_config_clock(struct mmc *mmc, unsigned div)
+static int mmc_config_clock(struct mmc *mmc)
 {
 	struct sunxi_mmc_host* mmchost = (struct sunxi_mmc_host *)mmc->priv;
 	unsigned rval = readl(&mmchost->reg->clkcr);
@@ -277,12 +375,9 @@ static int mmc_config_clock(struct mmc *mmc, unsigned div)
 	writel(rval, &mmchost->reg->clkcr);
 	if(mmc_update_clk(mmc))
 		return -1;
-	/* Change Divider Factor */
-	rval &= ~(0xFF);
-	rval |= div;
-	writel(rval, &mmchost->reg->clkcr);
-	if(mmc_update_clk(mmc))
-		return -1;
+
+	smc_set_card_clk(mmchost->mmc_no,mmc->clock,mmc->bus_width);
+
 	/* Re-enable Clock */
 	rval |= (1 << 16);
 	writel(rval, &mmchost->reg->clkcr);
@@ -299,9 +394,9 @@ static void mmc_set_ios(struct mmc *mmc)
 	MMCDBG("set ios: bus_width: %x, clock: %d, mod_clk\n", mmc->bus_width, mmc->clock, mmchost->mod_clk);
 
 	/* Change clock first */
-	clkdiv = (mmchost->mod_clk + (mmc->clock>>1))/mmc->clock/2;
+	//clkdiv = (mmchost->mod_clk + (mmc->clock>>1))/mmc->clock/2;
 	if (mmc->clock)
-		if (mmc_config_clock(mmc, clkdiv)) {
+		if (mmc_config_clock(mmc)) {
 			mmchost->fatal_err = 1;
 			return;
 		}
@@ -334,7 +429,7 @@ static int mmc_trans_data_by_cpu(struct mmc *mmc, struct mmc_data *data)
 		buff = (unsigned int *)data->dest;
 		for (i=0; i<(byte_cnt>>2); i++) {
 			while(--timeout && (readl(&mmchost->reg->status)&(1 << 2)));
-			if (timeout <= 0) 
+			if (timeout <= 0)
 				goto out;
 			buff[i] = readl(mmchost->database);
 			timeout = 0xfffff;
@@ -343,7 +438,7 @@ static int mmc_trans_data_by_cpu(struct mmc *mmc, struct mmc_data *data)
 		buff = (unsigned int *)data->src;
 		for (i=0; i<(byte_cnt>>2); i++) {
 			while(--timeout && (readl(&mmchost->reg->status)&(1 << 3)));
-			if (timeout <= 0) 
+			if (timeout <= 0)
 				goto out;
 			writel(buff[i], mmchost->database);
 			timeout = 0xfffff;
