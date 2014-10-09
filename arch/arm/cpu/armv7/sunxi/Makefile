@@ -22,6 +22,9 @@
 #
 
 include $(TOPDIR)/config.mk
+ifneq ($(OBJTREE),$(SRCTREE))
+$(shell mkdir -p $(obj)usb)
+endif
 
 LIB	=  $(obj)lib$(SOC).o
 
@@ -35,6 +38,9 @@ COBJS	+= gpio.o
 COBJS	+= key.o
 COBJS	+= fastboot.o
 COBJS	+= sparse.o
+COBJS	+= partition.o
+COBJS   += gic.o
+COBJS	+= sys_config.o
 COBJS	+= usb/usbc.o \
            usb/usbc_dev.o \
            usb/usbc_host.o \

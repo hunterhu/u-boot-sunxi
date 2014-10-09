@@ -1,24 +1,27 @@
 /*
-********************************************************************************************************************
-*                                              usb controller
-*
-*                              (c) Copyright 2007-2009, daniel.China
-*										All	Rights Reserved
-*
-* File Name 	: usbc_i.h
-*
-* Author 		: daniel
-*
-* Version 		: 1.0
-*
-* Date 			: 2009.09.15
-*
-* Description 	: ÊÊÓÃÓÚsuniiÆ½Ì¨£¬USB¹«¹²²Ù×÷²¿·Ö
-*
-* History 		:
-*
-********************************************************************************************************************
-*/
+ * (C) Copyright 2007-2012
+ * Allwinner Technology Co., Ltd. <www.allwinnertech.com>
+ * Jerry Wang <wangflord@allwinnertech.com>
+ *
+ * See file CREDITS for list of people who contributed to this
+ * project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ * MA 02111-1307 USA
+ */
+
 #ifndef  __USBC_I_H__
 #define  __USBC_I_H__
 
@@ -26,7 +29,7 @@
 
 #define  USBC_MAX_OPEN_NUM    8
 
-/* ¼ÇÂ¼USBµÄ¹«¹²ĞÅÏ¢ */
+/* è®°å½•USBçš„å…¬å…±ä¿¡æ¯ */
 typedef struct __fifo_info{
     __u32 port0_fifo_addr;
 	__u32 port0_fifo_size;
@@ -38,13 +41,13 @@ typedef struct __fifo_info{
 	__u32 port2_fifo_size;
 }__fifo_info_t;
 
-/* ¼ÇÂ¼µ±Ç°USB portËùÓĞµÄÓ²¼şĞÅÏ¢ */
+/* è®°å½•å½“å‰USB portæ‰€æœ‰çš„ç¡¬ä»¶ä¿¡æ¯ */
 typedef struct __usbc_otg{
     __u32 port_num;
 	__u32 base_addr;        /* usb base address 		*/
 
-	__u32 used;             /* ÊÇ·ñÕıÔÚ±»Ê¹ÓÃ   		*/
-    __u32 no;               /* ÔÚ¹ÜÀíÊı×éÖĞµÄÎ»ÖÃ 		*/
+	__u32 used;             /* æ˜¯å¦æ­£åœ¨è¢«ä½¿ç”¨   		*/
+    __u32 no;               /* åœ¨ç®¡ç†æ•°ç»„ä¸­çš„ä½ç½® 		*/
 }__usbc_otg_t;
 
 #endif   //__USBC_I_H__

@@ -1,23 +1,27 @@
 /*
-*************************************************************************************
-*                         			      Linux
-*					                 USB Host Driver
-*
-*				        (c) Copyright 2006-2010, All winners Co,Ld.
-*							       All Rights Reserved
-*
-* File Name 	: sw_usb_typedef.h
-*
-* Author 		: javen
-*
-* Description 	:
-*
-* History 		:
-*      <author>    		<time>       	<version >    		<desc>
-*       javen     	  2010-12-20           1.0          create this file
-*
-*************************************************************************************
-*/
+ * (C) Copyright 2007-2012
+ * Allwinner Technology Co., Ltd. <www.allwinnertech.com>
+ * Jerry Wang <wangflord@allwinnertech.com>
+ *
+ * See file CREDITS for list of people who contributed to this
+ * project.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ * MA 02111-1307 USA
+ */
+
 #ifndef  __SW_USB_TYPEDEF_H__
 #define  __SW_USB_TYPEDEF_H__
 
@@ -88,31 +92,31 @@ typedef signed char           __bool;
 #undef  __hdle
 typedef unsigned int        __hdle;
 
-/* …Ë÷√ƒ≥∏ˆbitŒªŒ™1 */
+/* ËÆæÁΩÆÊüê‰∏™bit‰Ωç‰∏∫1 */
 #undef  x_set_bit
 #define x_set_bit( value, bit )      		( (value) |=  ( 1U << (bit) ) )
 
-/* ∞—ƒ≥∏ˆbitŒª«Â¡„ */
+/* ÊääÊüê‰∏™bit‰ΩçÊ∏ÖÈõ∂ */
 #undef  x_clear_bit
 #define x_clear_bit( value, bit )    		( (value) &= ~( 1U << (bit) ) )
 
-/* ∞—ƒ≥∏ˆbitŒªµƒ÷µ»°∑¥ */
+/* ÊääÊüê‰∏™bit‰ΩçÁöÑÂÄºÂèñÂèç */
 #undef  x_reverse_bit
 #define x_reverse_bit( value, bit )  		( (value) ^=  ( 1U << (bit) ) )
 
-/* ≈–∂œƒ≥∏ˆbitŒª «∑ÒŒ™1 */
+/* Âà§Êñ≠Êüê‰∏™bit‰ΩçÊòØÂê¶‰∏∫1 */
 #undef  x_test_bit
 #define x_test_bit( value, bit )     		( (value)  &  ( 1U << (bit) ) )
 
-/* »°◊Ó–°÷µ */
+/* ÂèñÊúÄÂ∞èÂÄº */
 #undef  x_min
 #define x_min( x, y )          				( (x) < (y) ? (x) : (y) )
 
-/* »°◊Ó¥Û÷µ */
+/* ÂèñÊúÄÂ§ßÂÄº */
 #undef  x_max
 #define x_max( x, y )          				( (x) > (y) ? (x) : (y) )
 
-/* »°æ¯∂‘÷µ */
+/* ÂèñÁªùÂØπÂÄº */
 #undef  x_absolute
 #define x_absolute(p)        				((p) > 0 ? (p) : -(p))
 
