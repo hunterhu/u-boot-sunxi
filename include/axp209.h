@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2011, NVIDIA Corp. All rights reserved.
+ * (C) Copyright 2012 Henrik Nordstrom <henrik@henriknordstrom.net>
+ *
  * See file CREDITS for list of people who contributed to this
  * project.
  *
@@ -19,20 +20,12 @@
  * MA 02111-1307 USA
  */
 
-#ifndef _GPIO_H_
-#define _GPIO_H_
-
-#include <asm/arch/gpio.h>
-/*
- * Generic GPIO API
- */
-
-int gpio_request(unsigned gpio, const char *label);
-int gpio_free(unsigned gpio);
-void gpio_toggle_value(int gp);
-int gpio_direction_input(unsigned gpio);
-int gpio_direction_output(unsigned gpio, int value);
-int gpio_get_value(unsigned gpio);
-int gpio_set_value(unsigned gpio, int value);
-
-#endif	/* _GPIO_H_ */
+extern int axp209_set_dcdc2(int mvolt);
+extern int axp209_set_dcdc3(int mvolt);
+extern int axp209_set_ldo2(int mvolt);
+extern int axp209_set_ldo3(int mvolt);
+extern int axp209_set_ldo4(int mvolt);
+extern void axp209_poweroff(void);
+extern int axp209_init(void);
+extern int axp209_poweron_by_dc(void);
+extern int axp209_power_button(void);

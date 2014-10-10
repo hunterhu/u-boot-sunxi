@@ -21,7 +21,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
  * MA 02111-1307 USA
  */
- 
+
 #ifndef _SUNXI_GPIO_H
 #define _SUNXI_GPIO_H
 
@@ -45,7 +45,7 @@
 
 struct sunxi_gpio {
 	unsigned int cfg[4];
-	unsigned intdat;
+	unsigned dat;
 	unsigned int drv[2];
 	unsigned int pull[2];
 };
@@ -69,6 +69,9 @@ struct sunxi_gpio_reg {
 
 #define GPIO_CFG_INDEX(pin)		(((pin) & 0x1F) >> 3)
 #define GPIO_CFG_OFFSET(pin)		((((pin) & 0x1F) & 0x7) << 2)
+
+#define GPIO_PULL_INDEX(pin)    (((pin) & 0x1f) >> 4)
+#define GPIO_PULL_OFFSET(pin)   ((((pin) & 0x1f) & 0xf) << 1)
 
 /* GPIO bank sizes */
 #define SUNXI_GPIO_A_NR    (32)
@@ -155,7 +158,7 @@ enum sunxi_gpio_number {
 
 int sunxi_gpio_set_cfgpin(unsigned int pin, unsigned int val);
 int sunxi_gpio_get_cfgpin(unsigned int pin);
-int sunxi_gpio_output(unsigned int pin, unsigned int val);
-int sunxi_gpio_input(unsigned int pin);
+//int sunxi_gpio_output(unsigned int pin, unsigned int val);
+//int sunxi_gpio_input(unsigned int pin);
 
 #endif /* _SUNXI_GPIO_H */

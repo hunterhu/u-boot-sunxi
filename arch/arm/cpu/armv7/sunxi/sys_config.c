@@ -704,7 +704,7 @@ __s32 gpio_exit(void)
 ************************************************************************************************************
 */
 
-u32 gpio_request(user_gpio_set_t *gpio_list, __u32 group_count_max)
+static u32 gpio_request(user_gpio_set_t *gpio_list, __u32 group_count_max)
 {
     char               *user_gpio_buf;                                        //按照char类型申请
     system_gpio_set_t  *user_gpio_set, *tmp_sys_gpio_data;                      //user_gpio_set将是申请内存的句柄
@@ -930,7 +930,7 @@ u32 gpio_request(user_gpio_set_t *gpio_list, __u32 group_count_max)
 *
 ************************************************************************************************************
 */
-u32 gpio_request_ex(char *main_name, const char *sub_name)  //设备申请GPIO函数扩展接口
+static u32 gpio_request_ex(char *main_name, const char *sub_name)  //设备申请GPIO函数扩展接口
 {
     user_gpio_set_t    *gpio_list=NULL;
     user_gpio_set_t     one_gpio;
