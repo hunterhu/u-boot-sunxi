@@ -27,7 +27,6 @@
 #include <common.h>
 #include <asm/io.h>
 #include <fastboot.h>
-#include <axp209.h>
 
 #include <asm/arch/nand_bsp.h>
 #include <mmc.h>
@@ -233,14 +232,6 @@ void set_boot_type_arg(void){
 }
 /* add board specific code here */
 int board_init(void) {
-	int power_failed = 0;
-
-	power_failed |= axp209_init();
-	power_failed |= axp209_set_dcdc2(1400);
-	power_failed |= axp209_set_dcdc3(1250);
-	power_failed |= axp209_set_ldo2(3000);
-	power_failed |= axp209_set_ldo3(2800);
-	power_failed |= axp209_set_ldo4(2800);
 
 	gd->bd->bi_arch_number = 4283;
 	gd->bd->bi_boot_params = (PHYS_SDRAM_1 + 0x100);

@@ -57,8 +57,8 @@ int clock_init(void) {
 	sr32(&ccm->cpu_ahb_apb0_cfg, 9, 2, APB0_DIV);	/* APB0_CLK_DIV_RATIO [9:8] */
 
 	/* enable pll1 */
-	//sr32(&ccm->pll1_cfg, 31, 1, PLL1_ENABLE);		/* PLL1_ENABLE [31] */
-	//sdelay(0x1000);
+	sr32(&ccm->pll1_cfg, 31, 1, PLL1_ENABLE);		/* PLL1_ENABLE [31] */
+	sdelay(0x1000);
 
 	/* change cpu clock source to pll1 */
 	sr32(&ccm->cpu_ahb_apb0_cfg, 16, 2, CPU_CLK_SRC_PLL1);/* CPU_CLK_SRC_SEL [17:16] */
@@ -112,73 +112,5 @@ int clock_init(void) {
 	sr32(&ccm->ahb_gate0, AHB_GATE_OFFSET_NAND, 1, CLK_GATE_OPEN);
 #endif
 #endif  /* CONFIG_SUN6I_FPGA */
-	return 0;
-}
-
-void clock_set_pll1(int hz)
-{
-#if 0
-	int i = 0;
-	int axi, ahb, apb0;
-	struct sunxi_ccm_reg * const ccm =
-		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
-
-	/* Find target frequency */
-	while (pll1_para[i].freq < hz)
-		i++;
-
-	hz = pll1_para[i].freq;
-
-	/* Calculate system clock divisors */
-	axi = RDIV(hz, 432000000);		/* Max 450MHz */
-	ahb = RDIV(hz/axi, 204000000);		/* Max 250MHz */
-	apb0 = 2;				/* Max 150MHz */
-
-	printf("CPU: %dHz, AXI/AHB/APB: %d/%d/%d\n", hz, axi, ahb, apb0);
-
-	/* Map divisors to register values */
-	axi = axi - 1;
-	if (ahb > 4)
-		ahb = 3;
-	else if (ahb > 2)
-		ahb = 2;
-	else if (ahb > 1)
-		ahb = 1;
-	else
-		ahb = 0;
-
-	apb0 = apb0 - 1;
-
-	/* Switch to 24MHz clock while changing PLL1 */
-	writel(AXI_DIV_1 << 0 | AHB_DIV_2 << 4 | APB0_DIV_1 << 8 |
-	       CPU_CLK_SRC_OSC24M << 16, &ccm->cpu_ahb_apb0_cfg);
-	sdelay(20);
-
-	/* Configure sys clock divisors */
-	writel(axi << 0 | ahb << 4 | apb0 << 8 | CPU_CLK_SRC_OSC24M << 16,
-	       &ccm->cpu_ahb_apb0_cfg);
-
-	/* Configure PLL1 at the desired frequency */
-	writel(pll1_para[i].pll1_cfg, &ccm->pll1_cfg);
-	sdelay(200);
-
-	/* Switch CPU to PLL1 */
-	writel(axi << 0 | ahb << 4 | apb0 << 8 | CPU_CLK_SRC_PLL1 << 16,
-	       &ccm->cpu_ahb_apb0_cfg);
-	sdelay(20);
-#endif
-}
-
-int clock_twi_onoff(int port, int state)
-{
-	struct sunxi_ccm_reg *const ccm =
-		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
-
-	if (port > 2)
-		return -1;
-
-	/* set the apb1 clock gate for twi */
-	sr32(&ccm->apb1_gate, 0 + port, 1, state);
-
 	return 0;
 }

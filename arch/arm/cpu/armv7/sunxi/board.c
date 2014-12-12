@@ -51,8 +51,8 @@ int watchdog_init(void) {
 	return 0;
 }
 
-#if 0
 int clock_init(void) {
+#if 0
 	struct sunxi_ccm_reg *ccm =
 		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
 
@@ -98,9 +98,9 @@ int clock_init(void) {
 	sr32((u32 *)SUNXI_CCM_NAND_SCLK_CFG, 31, 1, CLK_GATE_OPEN);
 	/* open clock for nand */
 	sr32((u32 *)SUNXI_CCM_AHB_GATING0, 13, 1, CLK_GATE_OPEN);
+#endif
 	return 0;
 }
-#endif
 
 void gpio_init(void) {
 #if 0

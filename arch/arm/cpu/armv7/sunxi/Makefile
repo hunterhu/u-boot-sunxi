@@ -31,11 +31,10 @@ LIB	=  $(obj)lib$(SOC).o
 SOBJS	:= lowlevel_init.o
 SOBJS	+= reset.o
 
-COBJS	+= pinmux.o
-COBJS	+= clock.o
 COBJS	+= timer.o
 COBJS	+= cpu_info.o
 COBJS	+= board.o
+COBJS	+= gpio.o
 COBJS	+= key.o
 COBJS	+= fastboot.o
 COBJS	+= sparse.o

@@ -100,21 +100,6 @@
 #define CONFIG_INITRD_TAG
 #define CONFIG_CMDLINE_EDITING
 
-/* PMU */
-#define CONFIG_AXP209_POWER
-
-/* I2C */
-#define CONFIG_SPL_I2C_SUPPORT
-#define CONFIG_SYS_I2C_SPEED        400000
-#define CONFIG_HARD_I2C
-#define CONFIG_SUNXI_I2C
-#define CONFIG_SYS_I2C_SLAVE        0x7f
-#define CONFIG_CMD_I2C
-
-/* GPIO */
-#define CONFIG_SUNXI_GPIO
-#define CONFIG_CMD_GPIO
-
 /* mmc config */
 #define CONFIG_MMC
 #define CONFIG_GENERIC_MMC

@@ -167,10 +167,7 @@ struct sunxi_ccm_reg {
 #define NAND_CLK_DIV_N			0
 #define NAND_CLK_DIV_M			0
 
-int clock_init(void);
-int clock_twi_onoff(int port, int state);
-void clock_set_pll1(int mhz);
-unsigned int clock_get_pll5(void);
+
 
 
 #endif /* _SUNXI_CLOCK_H */
