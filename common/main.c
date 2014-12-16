@@ -289,7 +289,7 @@ void main_loop (void)
 	bootcount = bootcount_load();
 	bootcount++;
     printf("bootcount=%u\n",bootcount);
-	bootcount_store (bootcount);
+	bootcount_store(bootcount);
 	sprintf (bcs_set, "%lu", bootcount);
 	setenv ("bootcount", bcs_set);
 	bcs = getenv ("bootlimit");
@@ -365,6 +365,10 @@ void main_loop (void)
 		printf ("Warning: Bootlimit (%u) exceeded. Using altbootcmd.\n",
 		        (unsigned)bootlimit);
 		s = getenv ("altbootcmd");
+        /* reset bootcount after boot from alternative
+         * when a battery exists, the bootcount would never be cleared
+         */
+        bootcount_store(0);
 	}
 	else
 #endif /* CONFIG_BOOTCOUNT_LIMIT */
