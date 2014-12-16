@@ -205,6 +205,21 @@
 	"fi;" \
 	"run setargs loadscript loadkernel; watchdog 0; bootm $kerneladdr;"
 
+#define CONFIG_ALT_BOOTCOMMAND \
+	"if run loadbootenv; then " \
+		"echo Loaded environment from ${bootenv};" \
+		"env import -t ${scriptaddr} ${filesize};" \
+	"fi;" \
+	"if test -n ${uenvcmd}; then " \
+		"echo Running uenvcmd ...;" \
+		"run uenvcmd;" \
+	"fi;" \
+	"if run loadbootscr; then "\
+		"echo Jumping to ${bootscr};" \
+		"source ${scriptaddr};" \
+	"fi;" \
+	"run setargs loadscript loadaltkernel; watchdog 0; bootm $kerneladdr;"
+
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"root=/dev/nand3 rootwait\0" \
 	"panicarg=panic=10\0" \
@@ -216,6 +231,7 @@
 	"setargs=setenv bootargs console=${console} root=${root}" \
 	" loglevel=${loglevel} ${panicarg} ${extraargs}\0" \
 	"kernel=uImage\0" \
+	"altkernel=uImage.alt\0" \
 	"bootenv=uEnv.txt\0" \
 	"bootscr=boot.scr\0" \
 	"script=script.bin\0" \
@@ -223,11 +239,24 @@
 	"loadbootscr=fatload nand 0 $scriptaddr $bootscr || ext4load nand 0:$ext4bootpart $scriptaddr $bootscr || ext4load nand 0:$ext4bootpart $scriptaddr boot/$bootscr\0" \
 	"loadbootenv=fatload nand 0 $scriptaddr $bootenv || ext4load nand 0:$ext4bootpart $scriptaddr $bootenv || ext4load nand 0:$ext4bootpart $scriptaddr boot/$bootenv\0" \
 	"loadscript=fatload nand 0 $envaddr $script || ext4load nand 0:$ext4bootpart $envaddr $script || ext4load nand 0:$ext4bootpart $envaddr boot/$script\0" \
-	"loadkernel=fatload nand 0 $kerneladdr $kernel || ext4load nand 0:$ext4bootpart $kerneladdr $kernel || ext4load nand 0:$ext4bootpart $kerneladdr boot/$kernel\0"
+	"loadaltkernel=fatload nand 0 $kerneladdr $altkernel || ext4load nand 0:$ext4bootpart $kerneladdr $altkernel || ext4load nand 0:$ext4bootpart $kerneladdr boot/$altkernel\0" \
+	"loadkernel=fatload nand 0 $kerneladdr $kernel || ext4load nand 0:$ext4bootpart $kerneladdr $kernel || ext4load nand 0:$ext4bootpart $kerneladdr boot/$kernel\0" \
+    "bootcmd="CONFIG_BOOTCOMMAND"\0" \
+    "altbootcmd="CONFIG_ALT_BOOTCOMMAND"\0" \
+    ""
 
 #define CONFIG_BOOTDELAY	1
+#define CONFIG_BOOTCOUNT_LIMIT	1
 #define CONFIG_SYS_BOOT_GET_CMDLINE
 #define CONFIG_AUTO_COMPLETE
+
+#ifdef CONFIG_BOOTCOUNT_LIMIT
+/* refer to A20 memory map, 0x00008000 is in the range of SRAM section A
+ * it is used for EMAC, since we are not using EMAC in u-boot environment,
+ * it is used to store BOOTCOUNT
+ */
+#define CONFIG_BOOTCOUNT_ADDR       0x00008000
+#endif
 
 #define CONFIG_CMD_FAT			/* with this we can access bootfs in nand */
 #define CONFIG_CMD_BOOTA		/* boot android image */

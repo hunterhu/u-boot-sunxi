@@ -80,3 +80,25 @@ int cleanup_before_linux(void)
 
 	return 0;
 }
+
+#ifdef CONFIG_BOOTCOUNT_LIMIT
+
+void bootcount_store (ulong a)
+{
+	volatile ulong *save_addr = (volatile ulong *)(CONFIG_BOOTCOUNT_ADDR);
+
+	save_addr[0] = a;
+	save_addr[1] = BOOTCOUNT_MAGIC;
+}
+
+ulong bootcount_load (void)
+{
+	volatile ulong *save_addr = (volatile ulong *)(CONFIG_BOOTCOUNT_ADDR);
+
+	if (save_addr[1] != BOOTCOUNT_MAGIC)
+		return 0;
+	else
+		return save_addr[0];
+}
+
+#endif /* CONFIG_BOOTCOUNT_LIMIT */
