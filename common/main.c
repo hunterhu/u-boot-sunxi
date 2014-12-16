@@ -288,6 +288,7 @@ void main_loop (void)
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	bootcount = bootcount_load();
 	bootcount++;
+    printf("bootcount=%u\n",bootcount);
 	bootcount_store (bootcount);
 	sprintf (bcs_set, "%lu", bootcount);
 	setenv ("bootcount", bcs_set);

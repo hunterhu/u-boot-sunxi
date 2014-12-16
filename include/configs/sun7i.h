@@ -242,11 +242,13 @@
 	"loadaltkernel=fatload nand 0 $kerneladdr $altkernel || ext4load nand 0:$ext4bootpart $kerneladdr $altkernel || ext4load nand 0:$ext4bootpart $kerneladdr boot/$altkernel\0" \
 	"loadkernel=fatload nand 0 $kerneladdr $kernel || ext4load nand 0:$ext4bootpart $kerneladdr $kernel || ext4load nand 0:$ext4bootpart $kerneladdr boot/$kernel\0" \
     "bootcmd="CONFIG_BOOTCOMMAND"\0" \
+    "bootlimit="CONFIG_BOOT_LIMIT"\0" \
     "altbootcmd="CONFIG_ALT_BOOTCOMMAND"\0" \
     ""
 
 #define CONFIG_BOOTDELAY	1
 #define CONFIG_BOOTCOUNT_LIMIT	1
+#define CONFIG_BOOT_LIMIT	"1"
 #define CONFIG_SYS_BOOT_GET_CMDLINE
 #define CONFIG_AUTO_COMPLETE
 
