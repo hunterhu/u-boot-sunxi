@@ -192,30 +192,24 @@
 
 #define CONFIG_BOOTCOMMAND \
 	"if run loadbootenv; then " \
-		"echo Loaded environment from ${bootenv};" \
 		"env import -t ${scriptaddr} ${filesize};" \
 	"fi;" \
 	"if test -n ${uenvcmd}; then " \
-		"echo Running uenvcmd ...;" \
 		"run uenvcmd;" \
 	"fi;" \
 	"if run loadbootscr; then "\
-		"echo Jumping to ${bootscr};" \
 		"source ${scriptaddr};" \
 	"fi;" \
 	"run setargs loadscript loadkernel; watchdog 0; bootm $kerneladdr;"
 
 #define CONFIG_ALT_BOOTCOMMAND \
 	"if run loadbootenv; then " \
-		"echo Loaded environment from ${bootenv};" \
 		"env import -t ${scriptaddr} ${filesize};" \
 	"fi;" \
 	"if test -n ${uenvcmd}; then " \
-		"echo Running uenvcmd ...;" \
 		"run uenvcmd;" \
 	"fi;" \
 	"if run loadbootscr; then "\
-		"echo Jumping to ${bootscr};" \
 		"source ${scriptaddr};" \
 	"fi;" \
 	"run setargs loadscript loadaltkernel; watchdog 0; bootm $kerneladdr;"

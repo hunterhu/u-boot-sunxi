@@ -368,13 +368,14 @@ void main_loop (void)
         /* reset bootcount after boot from alternative
          * when a battery exists, the bootcount would never be cleared
          */
+        printf("Resetting bootcount to 0 ...\n");
         bootcount_store(0);
 	}
 	else
 #endif /* CONFIG_BOOTCOUNT_LIMIT */
 		s = getenv ("bootcmd");
 
-	debug ("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
+	printf("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
 
 	if (bootdelay >= 0 && s && !abortboot (bootdelay)) {
 # ifdef CONFIG_AUTOBOOT_KEYED
