@@ -200,7 +200,7 @@
 	"if run loadbootscr; then "\
 		"source ${scriptaddr};" \
 	"fi;" \
-	"run setargs loadscript loadkernel; watchdog 0; bootm $kerneladdr;"
+	"run setargs loadscript loadkernel loaduinitrd; watchdog 0; bootm $kerneladdr $uinitrdaddr;"
 
 #define CONFIG_ALT_BOOTCOMMAND \
 	"if run loadbootenv; then " \
@@ -212,7 +212,7 @@
 	"if run loadbootscr; then "\
 		"source ${scriptaddr};" \
 	"fi;" \
-	"run setargs loadscript loadaltkernel; watchdog 0; bootm $kerneladdr;"
+	"run setargs loadscript loadaltkernel loaduinitrd; watchdog 0; bootm $kerneladdr $uinitrdaddr;"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"root=/dev/nand3 rootwait\0" \
@@ -222,6 +222,7 @@
 	"scriptaddr=0x44000000\0" \
 	"envaddr=0x43000000\0" \
 	"kerneladdr=0x48000000\0" \
+	"uinitrdaddr=0x50000000\0" \
 	"setargs=setenv bootargs console=${console} root=${root}" \
 	" loglevel=${loglevel} ${panicarg} ${extraargs}\0" \
 	"kernel=uImage\0" \
@@ -234,6 +235,7 @@
 	"loadbootenv=fatload nand 0 $scriptaddr $bootenv || ext4load nand 0:$ext4bootpart $scriptaddr $bootenv || ext4load nand 0:$ext4bootpart $scriptaddr boot/$bootenv\0" \
 	"loadscript=fatload nand 0 $envaddr $script || ext4load nand 0:$ext4bootpart $envaddr $script || ext4load nand 0:$ext4bootpart $envaddr boot/$script\0" \
 	"loadaltkernel=fatload nand 0 $kerneladdr $altkernel || ext4load nand 0:$ext4bootpart $kerneladdr $altkernel || ext4load nand 0:$ext4bootpart $kerneladdr boot/$altkernel\0" \
+	"loaduinitrd=fatload nand 0 $uinitrdaddr uInitrd\0" \
 	"loadkernel=fatload nand 0 $kerneladdr $kernel || ext4load nand 0:$ext4bootpart $kerneladdr $kernel || ext4load nand 0:$ext4bootpart $kerneladdr boot/$kernel\0" \
     "bootcmd="CONFIG_BOOTCOMMAND"\0" \
     "bootlimit="CONFIG_BOOT_LIMIT"\0" \
