@@ -223,6 +223,13 @@
 	  " || " \
 	  "ext2load $device $partition $scriptaddr ${bootenv}" \
 	  "\0" \
+	"loaduinitrd=" \
+	  "fatload $device $partition 0x50000000 uInitrd" \
+	  " || " \
+	  "ext2load $device $partition 0x50000000 boot/uInitrd" \
+	  " || " \
+	  "ext2load $device $partition 0x50000000 uInitrd" \
+	  "\0" \
 	"loadkernel=" \
 	  "if "\
 	    "bootpath=/boot/" \
@@ -249,11 +256,13 @@
 	"autoboot=" \
 	  "run loadkernel" \
 	  " && " \
+	  "run loaduinitrd" \
+	  " && " \
 	  "run setargs" \
 	  " && " \
 	  RESET_WATCHDOG \
 	  " && " \
-	  "bootm 0x48000000" \
+	  "bootm 0x48000000 0x50000000" \
 	  "\0" \
 	"boot_ram=" \
 	  "saved_stdout=$stdout;setenv stdout nc;"\
